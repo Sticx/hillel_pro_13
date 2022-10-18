@@ -7,13 +7,23 @@ function UserTable({ _content, _form, _addButton, _deleteButton, _userInfo, _loc
     this.onSubmit = function () {
         _form.addEventListener('submit', (event) => {
             event.preventDefault();
-            this.addUser({
-                name: _form.elements['name'].value,
-                age: _form.elements['age'].value,
-                phone: _form.elements['phone'].value,
-                id: Math.floor(Math.random() * 100),
-            });
+            if (_form.elements['id'].value) {
+                this.updateUser({
+                    name: _form.elements['name'].value,
+                    age: _form.elements['age'].value,
+                    phone: _form.elements['phone'].value,
+                    id: _form.elements['id'].value,
+                })
+            } else {
+                this.addUser({
+                    name: _form.elements['name'].value,
+                    age: _form.elements['age'].value,
+                    phone: _form.elements['phone'].value,
+                    id: Math.floor(Math.random() * 100),
+                });
+            }
             _form.reset();
+            _form.elements['id'].value = '';
             _form.classList.remove('open');
         });
     }
@@ -22,6 +32,18 @@ function UserTable({ _content, _form, _addButton, _deleteButton, _userInfo, _loc
         const users = JSON.parse(localStorage.getItem(_localStorageKeyName)) || [];
         users.push(user);
         localStorage.setItem(_localStorageKeyName, JSON.stringify(users));
+    }
+    this.updateUser = function (user) {
+        const users = JSON.parse(localStorage.getItem(_localStorageKeyName));
+        const newUsers = users.map(function (item) {
+            if (+item.id === +user.id) {
+                return user;
+            }
+            return item;
+        });
+        _content.innerHTML = '';
+        newUsers.forEach(user => this.userTemplate(user));
+        localStorage.setItem(_localStorageKeyName, JSON.stringify(newUsers));
     }
     this.userTemplate = function (user) {
         _content.insertAdjacentHTML('beforeend', (
@@ -32,6 +54,7 @@ function UserTable({ _content, _form, _addButton, _deleteButton, _userInfo, _loc
                 `<td>${user.age}</td>`+
                 `<td>`+
                     '<button type="button" class="btn btn-primary js--view">View</button>'+
+                    ' <button type="button" class="btn btn-primary js--edit">Edit</button>'+
                     ' <button type="button" class="btn btn-primary js--delete">Delete</button>'+
                 `</td>`+
             `</tr>`
@@ -39,20 +62,32 @@ function UserTable({ _content, _form, _addButton, _deleteButton, _userInfo, _loc
         const _currentTr = document.querySelector(`[data-id="${user.id}"]`);
         const viewButton = _currentTr.querySelector('.js--view');
         const deleteButton = _currentTr.querySelector('.js--delete');
+        const editButton = _currentTr.querySelector('.js--edit');
+
         const handleView = () => {
             _userInfo.innerHTML = JSON.stringify(user, undefined, 2);
         }
-        const handleDelete = ()=>{
 
-           let deletedUser = _currentTr;
-           deletedUser.remove();
-            _userInfo.innerHTML='';
-            localStorage.setItem(_localStorageKeyName,JSON.stringify(deletedUser));
-            localStorage.removeItem('deletedUser');
+        const handleDelete = () => {
+            _currentTr.remove();
+            const users = JSON.parse(localStorage.getItem(_localStorageKeyName));
+            const newUsers = users.filter((item) => +item.id !== +user.id);
+            localStorage.setItem(_localStorageKeyName, JSON.stringify(newUsers));
+            _userInfo.innerHTML = '';
         }
+
+        const handleEdit = () => {
+            _form.reset();
+            _form.classList.add('open');
+            _form.elements['id'].value = user.id;
+            _form.elements['name'].value = user.name;
+            _form.elements['phone'].value = user.phone;
+            _form.elements['age'].value = user.age;
+        }
+
         viewButton.addEventListener('click', handleView);
         deleteButton.addEventListener('click',handleDelete);
-
+        editButton.addEventListener('click', handleEdit);
     }
     this.onAddButton = function () {
         _addButton.addEventListener('click', function () {
