@@ -2,7 +2,6 @@ function UserTable({ _content, _form, _addButton, _deleteButton, _userInfo, _loc
     this.init = function () {
         this.onSubmit();
         this.onAddButton();
-        this.onDeleteButton();
         this.loadUser();
     }
     this.onSubmit = function () {
@@ -22,7 +21,7 @@ function UserTable({ _content, _form, _addButton, _deleteButton, _userInfo, _loc
         this.userTemplate(user);
         const users = JSON.parse(localStorage.getItem(_localStorageKeyName)) || [];
         users.push(user);
-        localStorage.setItem(_localStorageKeyName, JSON.stringify(users))
+        localStorage.setItem(_localStorageKeyName, JSON.stringify(users));
     }
     this.userTemplate = function (user) {
         _content.insertAdjacentHTML('beforeend', (
@@ -33,7 +32,7 @@ function UserTable({ _content, _form, _addButton, _deleteButton, _userInfo, _loc
                 `<td>${user.age}</td>`+
                 `<td>`+
                     '<button type="button" class="btn btn-primary js--view">View</button>'+
-                    '<button type="button" class="btn btn-primary js--delete">Delete</button>'+
+                    ' <button type="button" class="btn btn-primary js--delete">Delete</button>'+
                 `</td>`+
             `</tr>`
         ))
@@ -44,8 +43,12 @@ function UserTable({ _content, _form, _addButton, _deleteButton, _userInfo, _loc
             _userInfo.innerHTML = JSON.stringify(user, undefined, 2);
         }
         const handleDelete = ()=>{
-            _content.remove(_localStorageKeyName,_currentTr);
-            _userInfo.remove(_localStorageKeyName,_currentTr);
+
+           let deletedUser = _currentTr;
+           deletedUser.remove();
+            _userInfo.innerHTML='';
+            localStorage.setItem(_localStorageKeyName,JSON.stringify(deletedUser));
+            localStorage.removeItem(deletedUser);
         }
         viewButton.addEventListener('click', handleView);
         deleteButton.addEventListener('click',handleDelete);
@@ -54,11 +57,6 @@ function UserTable({ _content, _form, _addButton, _deleteButton, _userInfo, _loc
     this.onAddButton = function () {
         _addButton.addEventListener('click', function () {
             _form.classList.add('open');
-        })
-    }
-    this.onDeleteButton = function (){
-        _deleteButton.addEventListener('click',function (){
-            _userInfo.remove('cu');
         })
     }
 
@@ -82,3 +80,5 @@ const userDate = new UserTable({
 document.addEventListener('DOMContentLoaded', function () {
     userDate.init();
 });
+
+
