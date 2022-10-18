@@ -48,7 +48,7 @@ function UserTable({ _content, _form, _addButton, _deleteButton, _userInfo, _loc
            deletedUser.remove();
             _userInfo.innerHTML='';
             localStorage.setItem(_localStorageKeyName,JSON.stringify(deletedUser));
-            localStorage.removeItem(deletedUser);
+            localStorage.removeItem('deletedUser');
         }
         viewButton.addEventListener('click', handleView);
         deleteButton.addEventListener('click',handleDelete);
